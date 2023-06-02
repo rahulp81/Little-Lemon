@@ -23,8 +23,8 @@ export default function About(){
         </div>
 
         <div className="owners">
-          <img id="chefs" src={grandpa} alt="Owner's inspiration" />
-          <img id="restaurant" src={restaurantChefs} alt="owners" />
+          <img id="chefs" src={restaurantChefs} alt="Owner's inspiration" />
+          <img id="restaurant" src={grandpa} alt="owners" />
         </div>
       </div>
     </>

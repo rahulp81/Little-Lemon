@@ -1,4 +1,4 @@
-import bruchetta from "../assets/images/bruchetta.svg";
+import IntroImage from '../assets/images/IntroImage.jpg'
 import { Link } from "react-router-dom";
 
 export default function Hero(){
@@ -21,7 +21,7 @@ export default function Hero(){
         </div>
 
         <div className="featured">
-          <img src={bruchetta} alt="bruchetta" />
+          <img src={IntroImage} alt="bruchetta" />
         </div>
       </div>
     </>
