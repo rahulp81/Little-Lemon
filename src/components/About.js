@@ -1,5 +1,5 @@
 import restaurantChefs from "../assets/images/Mario and Adrian A.jpg";
-import grandpa from "../assets/images/granndpa.jpg";
+import grandpa from "../assets/images/grandpa.jpg";
 import React from "react";
 
 export default function About(){
