@@ -8,12 +8,11 @@ import ConfirmedBooking from "./components/ConfirmedBooking";
 
 function App() {
   const [bookingData, setBookingData] = useState({
-    date: " ",
-    time: " ",
-    guests: " ",
-    occasion: " ",
+    date: '2023-06-01',
+    time: '17:00',
+    guests: 1,
+    occasion: 'Birthday',
   });
-
 
   const today = new Date();
 
@@ -51,7 +50,7 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-      <Route index element={<Home bookingData={bookingData} />} />
+        <Route index element={<Home bookingData={bookingData} />} />
         <Route
           path="reservations"
           element={

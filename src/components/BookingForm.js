@@ -1,6 +1,27 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../css/Booking.css";
+
+const AvailableTimes = ({ bookingData, items, availableTimes }) => {
+  if (
+    bookingData &&
+    bookingData.date &&
+    items &&
+    items.date !== bookingData.date
+  ) {
+    return availableTimes.times.map((time) => (
+      <option key={time}>{time}</option>
+    ));
+  } else {
+    return availableTimes.times.map((time) => {
+      if (items && items.time !== time) {
+        return <option key={time}>{time}</option>;
+      }
+      return null;
+    });
+  }
+};
+
 const BookingForm = ({
   bookingData,
   setBookingData,
@@ -14,56 +35,27 @@ const BookingForm = ({
   const [occasionError, setOccasionError] = useState(null);
   const [isTouched, setIsTouched] = useState(false);
   const [validated, setValidated] = useState(false);
-
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     validateForm();
-  }, [
-    dateError,
-    timeError,
-    guestsError,
-    occasionError,
-    isTouched,
-    validateForm,
-  ]);
+  }, [bookingData, isTouched]);
 
   const handleBlur = () => {
-    validateForm();
+    setIsTouched(true);
   };
 
   const handleChange = (e) => {
-    // console.log("should update errors");
+    const { id, value } = e.target;
 
-    switch (e.target.id) {
-      case "res-date":
-        setAvailableTimes({ type: "update_times" });
-        setBookingData((prevState) => {
-          return { ...prevState, date: e.target.value };
-        });
-        break;
-      case "res-time":
-        setBookingData((prevState) => {
-          return { ...prevState, time: e.target.value };
-        });
-        break;
-      case "guests":
-        setBookingData((prevState) => {
-          return { ...prevState, guests: e.target.value };
-        });
-        break;
-      case "occasion":
-        setBookingData((prevState) => {
-          return { ...prevState, occasion: e.target.value };
-        });
-        break;
-      default:
-        break;
-    }
+    setBookingData((prevState) => ({
+      ...prevState,
+      [id]: value,
+    }));
 
     setIsTouched(true);
-    validateForm();
   };
+
   function isValidDate(dateString) {
     const yyyymmdd = dateString.split("-");
     const dateObj = new Date(
@@ -78,47 +70,42 @@ const BookingForm = ({
 
   function validateForm() {
     if (isTouched) {
+      let errors = {};
+
       if (bookingData.guests < 1) {
-        setGuestsError("Has to be at least 1 guest");
+        errors.guests = "Has to be at least 1 guest";
       } else if (bookingData.guests > 10) {
-        setGuestsError("Cannot seat more then 10");
+        errors.guests = "Cannot seat more than 10";
       } else {
-        setGuestsError(null);
+        errors.guests = null;
       }
 
       if (bookingData.date === "") {
-        setDateError("Must select a date");
+        errors.date = "Must select a date";
+      } else if (!isValidDate(bookingData.date)) {
+        errors.date = "Sorry! Reservations not available for this date!";
       } else {
-        setDateError(null);
+        errors.date = null;
       }
-      if (!isValidDate(bookingData.date)) {
-        setDateError(`Sorry! Reservations not available for this date!`);
-      } else {
-        setDateError(null);
-      }
+
       if (bookingData.time === "") {
-        setTimeError("Must select a time");
+        errors.time = "Must select a time";
       } else {
-        setTimeError(null);
+        errors.time = null;
       }
 
       if (bookingData.occasion === "") {
-        setOccasionError("Must select an occasion");
+        errors.occasion = "Must select an occasion";
       } else {
-        setOccasionError(null);
+        errors.occasion = null;
       }
 
-      if (
-        dateError === null &&
-        timeError === null &&
-        guestsError === null &&
-        occasionError === null &&
-        isTouched
-      ) {
-        setValidated(true);
-      } else {
-        setValidated(false);
-      }
+      setGuestsError(errors.guests);
+      setDateError(errors.date);
+      setTimeError(errors.time);
+      setOccasionError(errors.occasion);
+
+      setValidated(Object.values(errors).every((error) => error === null));
     }
   }
 
@@ -135,36 +122,6 @@ const BookingForm = ({
     }
   };
 
-  const [items, setItems] = useState({
-    date: "",
-    time: "",
-    guests: "",
-    occasion: "",
-  });
-
-  useEffect(() => {
-    const items = JSON.parse(localStorage.getItem("bookings"));
-    if (items) {
-      setItems(items);
-    }
-  }, []);
-
-  const AvailableTimes = () => {
-    const items = JSON.parse(localStorage.getItem("bookings"));
-
-    console.log(bookingData, items);
-    if (bookingData && bookingData.date && items.date !== bookingData.date) {
-      return availableTimes.times.map((time) => {
-        return <option key={time}>{time}</option>;
-      });
-    } else {
-      return availableTimes.times.map((time) => {
-        if (items && items.time !== time)
-          return <option key={time}>{time}</option>;
-      });
-    }
-  };
-
   return (
     <>
       <h1>Book Table Now</h1>
@@ -174,73 +131,67 @@ const BookingForm = ({
           className="booking"
           onSubmit={handleSubmit}
         >
-          <label htmlFor="res-date">Choose date</label>
-          <input
-            data-testid="date"
-            id="res-date"
-            required
-            value={bookingData.date}
-            onBlur={handleBlur}
-            onChange={handleChange}
-            type="date"
-          />
-          <span className="error">{dateError}</span>
-          <label htmlFor="res-time">Choose time</label>
-          <div data-testid="res-time">
-            <select
-              data-testid="time"
-              id="res-time"
-              required
-              value={bookingData.time}
-              onBlur={handleBlur}
+          {/* Rest of the form elements */}
+          <div className="form-group">
+            <label htmlFor="date">Date:</label>
+            <input
+              type="date"
+              id="date"
+              value={bookingData.date}
               onChange={handleChange}
-            >
-              <option></option>
-              <AvailableTimes />
-            </select>
+              onBlur={handleBlur}
+              className={dateError ? "error" : ""}
+            />
+            {dateError && <p className="error-message">{dateError}</p>}
           </div>
-          <span className="error">{timeError}</span>
-          <label htmlFor="guests">Guests</label>
-          <input
-            data-testid="guests"
-            required
-            type="number"
-            placeholder="1"
-            min="1"
-            max="10"
-            id="guests"
-            value={bookingData.guests}
-            onBlur={handleBlur}
-            onChange={handleChange}
-          />
-          <span className="error">{guestsError}</span>
 
-          <label htmlFor="occasion">Occasion</label>
-          <div data-testid="res-occasion">
+          <div className="form-group">
+            <label htmlFor="time">Time:</label>
             <select
-              data-testid="occasion"
-              id="occasion"
-              required
-              value={bookingData.occasion}
-              onBlur={handleBlur}
+              id="time"
+              value={bookingData.time}
               onChange={handleChange}
+              onBlur={handleBlur}
+              className={timeError ? "error" : ""}
             >
-              <option></option>
-              <option>None</option>
-              <option>Birthday</option>
-              <option>Anniversary</option>
+              <option value="">Select a time</option>
+              <AvailableTimes
+                bookingData={bookingData}
+                items={JSON.parse(localStorage.getItem("bookings"))}
+                availableTimes={availableTimes}
+              />
             </select>
+            {timeError && <p className="error-message">{timeError}</p>}
           </div>
-          <span className="error">{occasionError}</span>
-          <button
-            onclick="handleCommand(event)"
-            data-testid="submit"
-            id="submitButton"
-            required
-            disabled={!validated}
-            type="submit"
-          >
-            {isLoading ? "Loading..." : "Make Your Reservation"}
+
+          <div className="form-group">
+            <label htmlFor="guests">Number of Guests:</label>
+            <input
+              type="number"
+              id="guests"
+              value={bookingData.guests}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              className={guestsError ? "error" : ""}
+            />
+            {guestsError && <p className="error-message">{guestsError}</p>}
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="occasion">Occasion:</label>
+            <input
+              type="text"
+              id="occasion"
+              value={bookingData.occasion}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              className={occasionError ? "error" : ""}
+            />
+            {occasionError && <p className="error-message">{occasionError}</p>}
+          </div>
+
+          <button type="submit" disabled={!validated || isLoading}>
+            {isLoading ? "Submitting..." : "Submit"}
           </button>
         </form>
       </div>

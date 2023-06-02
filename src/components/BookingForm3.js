@@ -98,20 +98,24 @@ const BookingForm = ({
 
   const AvailableTimes = () => {
     const items = JSON.parse(localStorage.getItem("bookings"));
-
-    if (items.date !== bookingData.date) {
-      return availableTimes.times.map((time) => {
+  
+    if (items && items.date !== bookingData.date) {
+      return availableTimes.map((time) => {
         return <option key={time}>{time}</option>;
       });
-    } else {
+    } else if (items) {
       const bookedTimes = items
         .filter((item) => item.date === bookingData.date)
         .map((item) => item.time);
-      return availableTimes.times
+      return availableTimes
         .filter((time) => !bookedTimes.includes(time))
         .map((time) => {
           return <option key={time}>{time}</option>;
         });
+    } else {
+      return availableTimes.map((time) => {
+        return <option key={time}>{time}</option>;
+      });
     }
   };
 

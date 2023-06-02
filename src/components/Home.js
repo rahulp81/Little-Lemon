@@ -1,11 +1,13 @@
 import Header from "./Header";
 import Hero from "./Hero";
+import Specials from "./Specials";
 import About from "./About";
 import Testimonials from "./Testimonials";
 import Footer from "./Footer";
-import Specials from "./Specials"
 
-export default function Home({bookingData}){
+
+const Home = ({bookingData}) => {
+  console.log(bookingData);
   return (
     <>
       <Header />
@@ -17,3 +19,5 @@ export default function Home({bookingData}){
     </>
   );
 };
+
+export default Home;
